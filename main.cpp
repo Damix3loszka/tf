@@ -10,11 +10,14 @@ namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
+    //// init if necessary
+    ////
+
     std::string configfile_name = "tf.conf";
     std::string template_folder{};
 
     argh::parser parser;
-    parser.add_params({"-F", "--folder"});
+    parser.add_params({"-F", "--folder", "-C", "--create"});
     parser.parse(argc, argv);
 
     //// changing default template folder
@@ -22,8 +25,7 @@ int main(int argc, char *argv[])
     {
         std::string new_template_folder = parser({"-F", "--folder"}).str();
         std::fstream config(configfile_name, std::ios::out);
-        if (config.is_open())
-            config << new_template_folder;
+        config << new_template_folder;
         config.close();
         return 0; ////endpoint
     }
@@ -58,14 +60,14 @@ int main(int argc, char *argv[])
     ////
     if (!fs::exists(template_folder))
     {
-        std::cout << "No such folder " + template_folder + " exists. Use -F or --folder to set a default template folder." << std::endl;
-        return 1;
+        std::cerr << "No such folder " + template_folder + " exists. Use -F or --folder to set a default template folder." << std::endl;
+        return 1; // endpoint
     }
 
     //// checking for correct number of arguments
     if (parser.size() < 2 || parser.size() > 3)
     {
-        std::cout << "Invalid number of arguments." << std::endl;
+        std::cerr << "Invalid number of arguments." << std::endl;
         return 2; // endpoint
     }
     ////
@@ -78,10 +80,37 @@ int main(int argc, char *argv[])
         name = "default";
 
     std::string template_file = name + "." + extension;
+    ////
 
-    if (fs::exists(template_folder + template_file))
-
-        std::cout << name << "." << extension << std::endl;
+    //// copying template file to current directory
+    if (!fs::exists(template_folder + template_file))
+    {
+        if (name == "default")
+        {
+            std::cout << "Create default template for ." + extension + "?(y or n): ";
+            std::string answer;
+            std::cin >> answer;
+            if (answer.length() != 1 || answer != "y")
+            {
+                std::cerr << "No template file with given extension" << std::endl;
+                return 3; // endpoint
+            }
+            else
+            {
+                std::fstream file(template_folder + template_file, std::ios::out);
+                file << " ";
+                file.close();
+                std::cout << "Template created." << std::endl;
+            }
+        }
+        else
+        {
+            std::cerr << "" << std::endl;
+        }
+        return 0; // endpoint
+    }
+    else
+        fs::copy(template_folder + template_file, ".");
     ////
     return 0; // endpoint
 }
