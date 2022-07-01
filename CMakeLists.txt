@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
-project(tf 1.0)
+project(tf)
 
 find_package(argh)
 add_executable(tf main.cpp)
