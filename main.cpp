@@ -85,27 +85,21 @@ int main(int argc, char *argv[])
     //// copying template file to current directory
     if (!fs::exists(template_folder + template_file))
     {
-        if (name == "default")
+        if (name != "default")
         {
-            std::cout << "Create default template for ." + extension + "?(y or n): ";
-            std::string answer;
-            std::cin >> answer;
-            if (answer.length() != 1 || answer != "y")
-            {
-                std::cerr << "No template file with given extension" << std::endl;
-                return 3; // endpoint
-            }
-            else
-            {
-                std::fstream file(template_folder + template_file, std::ios::out);
-                file << " ";
-                file.close();
-                std::cout << "Template created." << std::endl;
-            }
+            std::cerr << "No template with given name." << std::endl;
+            return 3; // endpoint
         }
-        else
+
+        std::cout << "Create default template for ." + extension + "?(y or n): ";
+        std::string answer;
+        std::cin >> answer;
+        if (answer == "y")
         {
-            std::cerr << "" << std::endl;
+            std::fstream file(template_folder + template_file, std::ios::out);
+            file << " ";
+            file.close();
+            std::cout << "Template created." << std::endl;
         }
         return 0; // endpoint
     }
