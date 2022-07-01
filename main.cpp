@@ -63,19 +63,25 @@ int main(int argc, char *argv[])
     }
 
     //// checking for correct number of arguments
-    if (parser.size() < 2)
+    if (parser.size() < 2 || parser.size() > 3)
     {
-        std::cout << "No arguments given." << std::endl;
-        return 2; // endpoint
-    }
-    if (parser.size() > 3)
-    {
-        std::cout << "Too many arguments given." << std::endl;
+        std::cout << "Invalid number of arguments." << std::endl;
         return 2; // endpoint
     }
     ////
 
     //// reading template name and extension
+    std::string extension = parser[1];
+    std::string name = parser[2];
 
+    if (name.empty())
+        name = "default";
+
+    std::string template_file = name + "." + extension;
+
+    if (fs::exists(template_folder + template_file))
+
+        std::cout << name << "." << extension << std::endl;
+    ////
     return 0; // endpoint
 }
