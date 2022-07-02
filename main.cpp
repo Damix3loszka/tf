@@ -4,12 +4,12 @@
 #include <argh.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
-
     //// init if necessary
     ////
 
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     std::string template_folder{};
 
     argh::parser parser;
-    parser.add_params({"-F", "--folder", "-C", "--create", "--help"});
+    parser.add_params({"-F", "--folder", "-C", "--create"});
     parser.parse(argc, argv);
 
     //// changing default template folder
@@ -28,12 +28,6 @@ int main(int argc, char *argv[])
         config << new_template_folder;
         config.close();
         return 0; ////endpoint
-    }
-    ////
-
-    //// help TODO
-    if (parser("--help"))
-    {
     }
     ////
 
@@ -49,24 +43,20 @@ int main(int argc, char *argv[])
     config.close();
     ////
 
-    //// changing ~ and # to homepath, adding / at the end, wrap it in a func later
-    if (template_folder[0] == '~' || template_folder[0] == '#')
+    //// changing ~ to homepath, wrap it in a func later
+    if (template_folder[0] == '~')
     {
         std::string user = getlogin();
-
         if (user == "root")
         {
-            template_folder = template_folder.replace(0, 1, "/root/");
+            template_folder = template_folder.replace(0, 1, "/root");
         }
         else
         {
             template_folder = template_folder.replace(0, 1, "/home/" + user);
         }
     }
-    if (template_folder[template_folder.length() - 1] != '/')
-        template_folder += "/";
     ////
-
     if (!fs::exists(template_folder))
     {
         std::cerr << "No such folder " + template_folder + " exists. Use -F or --folder to set a default template folder." << std::endl;
@@ -74,33 +64,42 @@ int main(int argc, char *argv[])
     }
 
     //// checking for correct number of arguments
-    if (parser.size() < 2 || parser.size() > 3)
+    if (parser.size() < 3 || parser.size() > 4)
     {
         std::cerr << "Invalid number of arguments." << std::endl;
         return 2; // endpoint
     }
     ////
 
-    //// reading template name and extension
-    std::string extension = parser[1];
-    std::string name = parser[2];
+    std::string extension, template_name, file_name;
 
-    if (name.empty())
-        name = "default";
+    if (parser.size() == 4)
+    {
+        extension = parser[1];
+        template_name = parser[2];
+        file_name = parser[3];
+    }
+    else
+    {
+        extension = parser[1];
+        template_name = "default";
+        file_name = parser[2];
+    }
+    //// reading template name, extension and file name
 
-    std::string template_file = name + "." + extension;
+    std::string template_file = template_name + "." + extension;
     ////
 
     //// copying template file to current directory
     if (!fs::exists(template_folder + template_file))
     {
-        if (name != "default")
+        if (template_name != "default")
         {
             std::cerr << "No template with given name." << std::endl;
             return 3; // endpoint
         }
 
-        std::cout << "Create default template for ." + extension + "?(y or n): ";
+        std::cout << "Create a default template for ." + extension + "?(y or n): ";
         std::string answer;
         std::cin >> answer;
         if (answer == "y")
@@ -113,7 +112,8 @@ int main(int argc, char *argv[])
         return 0; // endpoint
     }
     else
-        fs::copy(template_folder + template_file, ".");
+        fs::copy(template_folder + template_file, "./" + file_name + "." + extension);
+
     ////
     return 0; // endpoint
 }
