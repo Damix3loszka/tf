@@ -4,12 +4,12 @@
 #include <argh.h>
 #include <string>
 #include <fstream>
-#include <sstream>
 
 namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
+
     //// init if necessary
     ////
 
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     std::string template_folder{};
 
     argh::parser parser;
-    parser.add_params({"-F", "--folder", "-C", "--create"});
+    parser.add_params({"-F", "--folder", "-C", "--create", "--help"});
     parser.parse(argc, argv);
 
     //// changing default template folder
@@ -28,6 +28,12 @@ int main(int argc, char *argv[])
         config << new_template_folder;
         config.close();
         return 0; ////endpoint
+    }
+    ////
+
+    //// help TODO
+    if (parser("--help"))
+    {
     }
     ////
 
@@ -43,21 +49,24 @@ int main(int argc, char *argv[])
     config.close();
     ////
 
-    //// changing ~ to homepath, wrap it in a func later
-    if (template_folder[0] == '~')
+    //// changing ~ and # to homepath, adding / at the end, wrap it in a func later
+    if (template_folder[0] == '~' || template_folder[0] == '#')
     {
         std::string user = getlogin();
 
         if (user == "root")
         {
-            template_folder = template_folder.replace(0, 1, "/root");
+            template_folder = template_folder.replace(0, 1, "/root/");
         }
         else
         {
             template_folder = template_folder.replace(0, 1, "/home/" + user);
         }
     }
+    if (template_folder[template_folder.length() - 1] != '/')
+        template_folder += "/";
     ////
+
     if (!fs::exists(template_folder))
     {
         std::cerr << "No such folder " + template_folder + " exists. Use -F or --folder to set a default template folder." << std::endl;
