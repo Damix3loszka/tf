@@ -1,0 +1,5 @@
+bin tf -> /usr/bin
+tf.conf ->/etc
+create directory in cmake -> install(DIRECTORY "name" DESTINATION ${directory})
+https://stackoverflow.com/questions/12403334/cmake-how-to-create-a-directory-during-installation-with-certain-access-rights
+first create file/folder in build then install 

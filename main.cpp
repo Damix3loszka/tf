@@ -10,10 +10,8 @@ namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
-    //// init if necessary
-    ////
-
-    std::string configfile_name = "tf.conf";
+    // std::string config_file = "/etc/tf.conf";
+    std::string config_file = "tf.conf";
     std::string template_folder{};
 
     argh::parser parser;
@@ -24,7 +22,7 @@ int main(int argc, char *argv[])
     if (parser({"-F", "--folder"}))
     {
         std::string new_template_folder = parser({"-F", "--folder"}).str();
-        std::fstream config(configfile_name, std::ios::out);
+        std::fstream config(config_file, std::ios::out);
         config << new_template_folder;
         config.close();
         return 0; ////endpoint
@@ -32,14 +30,11 @@ int main(int argc, char *argv[])
     ////
 
     //// reading path to a template folder, wrap in a function later
-    std::fstream config(configfile_name, std::ios::in);
-    if (config.is_open())
-    {
-        std::string line = "";
-        std::istringstream stream{};
-        getline(config, line);
-        template_folder = line;
-    }
+    std::fstream config(config_file, std::ios::in);
+    std::string line = "";
+    std::istringstream stream{};
+    getline(config, line);
+    template_folder = line;
     config.close();
     ////
 
