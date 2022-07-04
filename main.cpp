@@ -1,66 +1,62 @@
 #include <iostream>
 #include <filesystem>
 #include <unistd.h>
-#include <argh.h>
+#include "include/argh.h"
 #include <string>
 #include <fstream>
 
 namespace fs = std::filesystem;
+
+void write_to_file(const std::string path, const std::string content);
+
+std::string read_from_file(const std::string path);
+
+void path_cleanup(std::string &path);
 
 int main(int argc, char *argv[])
 {
 
     ////init
     argh::parser parser;
-    parser.add_params({"-F", "--folder", "-C", "--create"});
+    parser.add_params({"-F", "--folder"});
     parser.parse(argc, argv);
 
     std::string config_file_name = ".tf.conf";
     std::string user = getlogin();
     std::string path = "/home/" + user + "/";
-    std::string template_folder{};
+    std::string template_folder_path{};
 
     if (!fs::exists(path + config_file_name))
     {
-        std::ofstream config_file(path + config_file_name);
-        config_file << path + "template_folder/";
+        write_to_file(path + config_file_name, path + "template_folder/");
         if (!fs::exists(path + "template_folder/"))
         {
             fs::create_directory(path + "template_folder/");
         }
     }
+    ////
 
-    //// reading path to a template folder, wrap in a function later
-    std::ifstream config(path + config_file_name);
-    config >> template_folder;
-    config.close();
+    //// reading path to a template folder
+    template_folder_path = read_from_file(path + config_file_name);
     ////
 
     //// changing ~ to homepath, wrap it in a func later
-    if (template_folder[0] == '~')
-        template_folder = template_folder.replace(0, 1, "/home/" + user);
-    if (template_folder[template_folder.size() - 1] != '/')
-        template_folder + "/";
+    path_cleanup(template_folder_path);
     ////
 
-    if (!fs::exists(template_folder))
+    if (!fs::exists(template_folder_path))
     {
         //// changing default template folder
         if (parser({"-F", "--folder"}))
         {
-            std::string new_template_folder = parser({"-F", "--folder"}).str();
-            if (new_template_folder[0] == '~')
-                template_folder = template_folder.replace(0, 1, "/home/" + user);
-            if (new_template_folder[new_template_folder.size() - 1] != '/')
-                template_folder + "/";
-            std::ofstream config(path + config_file_name);
-            config << new_template_folder;
-            config.close();
+            std::string new_template_folder_path = parser({"-F", "--folder"}).str();
+            path_cleanup(new_template_folder_path);
+            write_to_file(path + config_file_name, new_template_folder_path);
             return 0; ////endpoint
         }
         else
         {
-            std::cerr << "No such folder " + template_folder + " exists. Use -F or --folder to set a default template folder." << std::endl;
+            std::cerr << "No such folder " + template_folder_path + " exists. Use -F or --folder to set a default template folder." << std::endl;
             return 1; // endpoint
         }
         ////
@@ -95,7 +91,7 @@ int main(int argc, char *argv[])
     ////
 
     //// copying template file to current directory
-    if (!fs::exists(template_folder + template_file))
+    if (!fs::exists(template_folder_path + template_file))
     {
         if (template_name != "default")
         {
@@ -108,16 +104,45 @@ int main(int argc, char *argv[])
         std::cin >> answer;
         if (answer == "y")
         {
-            std::ofstream file(template_folder + template_file);
+            std::ofstream file(template_folder_path + template_file);
             file << " ";
             file.close();
+            write_to_file(template_folder_path + template_file, " ");
             std::cout << "Template created." << std::endl;
         }
         return 0; // endpoint
     }
     else
-        fs::copy(template_folder + template_file, "./" + file_name + "." + extension);
+        fs::copy(template_folder_path + template_file, "./" + file_name + "." + extension);
 
     ////
     return 0; // endpoint
+}
+
+void write_to_file(const std::string path, const std::string content)
+{
+    std::ofstream config(path);
+    config << content;
+    config.close();
+}
+
+std::string read_from_file(const std::string path)
+{
+    std::string contents{};
+    std::ifstream file(path);
+    file >> contents;
+    file.close();
+    return contents;
+}
+
+// changing ~ to homepath and adding / at the and if necessary
+void path_cleanup(std::string &path)
+{
+    if (path[0] == '~')
+    {
+        std::string user = getlogin();
+        path = path.replace(0, 1, "/home/" + user);
+    }
+    if (path[path.size() - 1] != '/')
+        path + "/";
 }
