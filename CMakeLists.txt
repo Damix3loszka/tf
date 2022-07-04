@@ -7,6 +7,8 @@ find_package(argh)
 
 add_executable(tf main.cpp)
 target_link_libraries(tf argh)
-file(COPY install_script.cmake DESTINATION build)
-install(SCRIPT install_script.cmake)
 install(TARGETS tf DESTINATION bin)
+
+SET(CPACK_GENERATOR "DEB")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "KK") # required
+INCLUDE(CPack)
