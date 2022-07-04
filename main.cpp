@@ -20,15 +20,15 @@ int main(int argc, char *argv[])
     std::string path = "/home/" + user + "/";
     std::string template_folder{};
 
-    // if (!fs::exists(path + config_file_name))
-    // {
-    //     std::ofstream config_file(path + config_file_name);
-    //     config_file << path + "template_folder/";
-    //     if (!fs::exists(path + "template_folder/"))
-    //     {
-    //         fs::create_directory(path + "template_folder/");
-    //     }
-    // }
+    if (!fs::exists(path + config_file_name))
+    {
+        std::ofstream config_file(path + config_file_name);
+        config_file << path + "template_folder/";
+        if (!fs::exists(path + "template_folder/"))
+        {
+            fs::create_directory(path + "template_folder/");
+        }
+    }
 
     //// reading path to a template folder, wrap in a function later
     std::ifstream config(path + config_file_name);
