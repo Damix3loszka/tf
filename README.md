@@ -13,5 +13,7 @@ To view help:
 ```
 tf -H  or  tf --help 
 ```
+Upon first use creates a folder template_folder in current user's home directory.
+This folder is used to store template files. It can be changed later.
 
 This project uses [Argh!](https://github.com/adishavit/argh).
