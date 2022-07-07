@@ -20,6 +20,7 @@ std::string help =
     "3. Prints absolute path to the template folder.\n"
     "4. Prints this.\n"
     "\n"
+    "This tool copies files from template folder to current directory and renames them. That is basically what it does.\n"
     "Templates are nothing but files in a form of TEMPLATE_NAME.EXTENSION.";
 
 void write_to_file(const std::string path, const std::string content);
@@ -66,14 +67,29 @@ int main(int argc, char *argv[])
         file_name = parser[3];
 
         std::string template_file = template_name + "." + extension;
-
+        std::string file_to_create = file_name + "." + extension;
         if (!fs::exists(template_folder_path + template_file))
         {
             std::cerr << "Template " + template_file + " doesn't exist." << std::endl;
             return 3; // endpoint
         }
-        else
-            fs::copy(template_folder_path + template_file, "./" + file_name + "." + extension);
+        if (fs::exists("./" + file_to_create))
+        {
+            std::cout << "Do you want to overwrite " + file_to_create + "?(y or n): ";
+            std::string answer{};
+            std::cin >> answer;
+            if (answer == "y")
+            {
+                fs::remove("./" + file_to_create);
+                std::cout << "Overwriting" << std::endl;
+            }
+            else
+            {
+                std::cout << "Not overwritten." << std::endl;
+                return 0; // endpoint
+            }
+        }
+        fs::copy(template_folder_path + template_file, "./" + file_name + "." + extension);
         return 0; // endpoint
     }
     else if (parser.params().size() == 1)
