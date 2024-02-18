@@ -11,9 +11,8 @@ Install(requires CMake):
 
 To view help:
 ```
-tf -H  or  tf --help 
+tf -h 
 ```
-Upon first use creates a folder template_folder in current user's home directory.
-This folder is used to store template files. It can be changed later.
+Upon first use creates a configuration file in the current user's home directory and asks to select template folder.
 
 This project uses [Argh!](https://github.com/adishavit/argh).
